@@ -77,3 +77,17 @@ for store_id, weights in ulsc.store_weights_.items():
     print(f"Store {store_id}:")
     print(weights['transactions'].nlargest(5))
 ```
+
+### Examine p-values
+
+```python
+pval_df = ulsc_ratio.permutation_p_values(df)
+# pval_df has rows for: transactions, revenue, avgTransaction
+# avgTransaction lift = (Σ actual_revenue / Σ actual_transactions
+#                  - Σ expected_revenue/ Σ expected_transactions)
+#                 / (Σ expected_revenue / Σ expected_transactions)
+
+# using a subsample of control units to build out the null distribution
+pval_df_n_placebos = slsc.permutation_p_values(df, n_placebos=200, seed=42)
+```
+
