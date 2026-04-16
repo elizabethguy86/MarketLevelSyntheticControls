@@ -47,12 +47,15 @@ ulsc_multi = UnitLevelSyntheticControl(
 )
 result_df_multi = ulsc_multi.fit_transform(df)
 # result_df_multi has 'expected_transactions' and 'expected_revenue' columns
+```
 
-#Outcomes that are a ratio of two metrics
-'''Defining ratio metrics is necessary to get accurate
+### Outcomes that are a ratio of two metrics
+Defining ratio metrics is necessary to get accurate
 estimates of the expected value of a ratio
 metric as a function of changes in the numerator /
-changes in the denominator'''
+changes in the denominator
+
+```python
 
 ulsc_ratio = UnitLevelSyntheticControl(
     outcome_col=['transactions', 'revenue'],
