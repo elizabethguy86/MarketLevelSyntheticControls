@@ -10,6 +10,9 @@ Unlike pooled synthetic DiD methods, ``UnitLevelSyntheticControl`` fits
 independent unit weights per unit, so each unit gets its own tailored
 synthetic control.  Other test units are excluded from each unit's donor
 pool to prevent cross-contamination.
+
+Credit given to Causal Inference for the Brave and True for methodology assistance and coding implementation
+[https://matheusfacure.github.io/python-causality-handbook/landing-page.html]
 """
 
 import numpy as np
