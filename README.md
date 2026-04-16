@@ -19,7 +19,7 @@ test_units = [1, 2, 3, 4, 5,
                12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 test_date = pd.to_datetime('YYYY-MM-DD')
-df['is_test'] = df['locationNum'].isin(test_stores)
+df['is_test'] = df['locationNum'].isin(test_units)
 df['post_launch'] = df['checkOpenDate'] > test_date
 
 # Single outcome
