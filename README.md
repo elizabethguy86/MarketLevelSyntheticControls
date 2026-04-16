@@ -67,8 +67,12 @@ ulsc_ratio = UnitLevelSyntheticControl(
     tail_periods=30,
     ratio_metrics={'avgTransaction': ('revenue', 'transactions')},  # derived ratio
 )
+```
 
-# Inspect per-store unit weights
+### Inspect per-store unit weights
+
+```python
+
 for store_id, weights in ulsc.store_weights_.items():
     print(f"Store {store_id}:")
     print(weights['transactions'].nlargest(5))
