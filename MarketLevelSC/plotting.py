@@ -1,3 +1,6 @@
+import pandas as pd
+import plotly.graph_objects as go
+
 class SyntheticControlPlotter:
     """
     Visualizes actual vs expected (synthetic control) time series
