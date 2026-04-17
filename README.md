@@ -6,6 +6,15 @@ Unlike `SyntheticDiD`, which treats all test units as one pooled treatment group
 
 Other test units are **excluded from each units's donor pool** to prevent contamination between treated units.
 
+### Data Requirements
+| Column | Type | Description |
+|--------|------|-------------|
+| `time_col` | date / datetime | One value per time period (e.g., `Date`) |
+| `unit_col` | int / str | Store identifier (e.g., `locationNum`) |
+| `treat_col` | bool | `True` for test units, `False` for control units |
+| `post_col` | bool | `True` for post-intervention rows, `False` for pre-period |
+| outcome columns | numeric | All columns listed in `outcome_col`; if using `ratio_metrics`, both numerator and denominator columns must be present |
+
 ### Example Usage
 
 ```python
