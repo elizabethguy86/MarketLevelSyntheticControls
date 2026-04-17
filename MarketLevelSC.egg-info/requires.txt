@@ -3,3 +3,4 @@ pandas
 cvxpy
 scikit-learn
 tqdm
+plotly

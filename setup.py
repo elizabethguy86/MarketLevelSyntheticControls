@@ -18,6 +18,7 @@ setup(
         "cvxpy",
         "scikit-learn",
         "tqdm",
+        "plotly",
     ],
     python_requires=">=3.8",
     classifiers=[

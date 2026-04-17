@@ -19,6 +19,7 @@ Requires-Dist: pandas
 Requires-Dist: cvxpy
 Requires-Dist: scikit-learn
 Requires-Dist: tqdm
+Requires-Dist: plotly
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
