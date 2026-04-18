@@ -99,4 +99,21 @@ pval_df = ulsc_ratio.permutation_p_values(df)
 # using a subsample of control units to build out the null distribution
 pval_df_n_placebos = slsc.permutation_p_values(df, n_placebos=200, seed=42)
 ```
+### Plotting actual vs expected time series based on SC modeling
 
+```python
+plotter = SyntheticControlPlotter(
+    result_df=result_df,
+    time_col='checkOpenDate',
+    unit_col='locationNum',
+    treat_col='is_test_store',
+    post_col='post_launch',
+    intervention_datetime='2025-11-03',
+    ratio_metrics={'avgTicket': ('grossSales', 'transactions')},
+)
+
+plotter.plot('avgTransaction', yaxis_label='Avg Transaction Size').show()
+plotter.plot('transactions').show()
+plotter.plot('revenue', yaxis_label='Revenue').show()
+
+```
