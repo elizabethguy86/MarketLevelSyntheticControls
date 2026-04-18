@@ -104,7 +104,7 @@ pval_df_n_placebos = slsc.permutation_p_values(df, n_placebos=200, seed=42)
 ```python
 plotter = SyntheticControlPlotter(
     result_df=result_df,
-    time_col='checkOpenDate',
+    time_col='Date',
     unit_col='locationNum',
     treat_col='is_test_store',
     post_col='post_launch',
