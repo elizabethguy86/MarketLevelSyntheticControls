@@ -90,6 +90,12 @@ pre_period_fit_metrics(
     ratio_metrics={'avgTicket': ('grossSales', 'transactions')},
 )
 ```
+For more comprehensive k-folds forward chaining validation, use the `sc_forward_chain_cv` function on a fitted unit-level synthetic control object. 
+```python
+sc_forward_chain_cv(ulsc, df, k=5)
+```
+Validation outputs will appear in a table and performed on each outcome and ratio metric identified. The output will look something like:
+
 
 
 ### Inspect per-store unit weights
