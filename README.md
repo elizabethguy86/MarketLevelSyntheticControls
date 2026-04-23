@@ -77,6 +77,20 @@ ulsc_ratio = UnitLevelSyntheticControl(
     ratio_metrics={'avgTransaction': ('revenue', 'transactions')},  # derived ratio
 )
 ```
+### Inspect pre-intervention fit metrics
+To assess the quality of your model, MarketLevelSyntheticControls has a `pre_period_fit_metrics` function that outputs the MAPE and R^2 values for your model prior to the intervention time. 
+
+```python
+pre_period_fit_metrics(
+    result_df,
+    outcomes=['transactions', 'grossSales'],
+    treat_col='is_test_store',
+    post_col='post_launch',
+    unit_col='locationNum',
+    ratio_metrics={'avgTicket': ('grossSales', 'transactions')},
+)
+```
+
 
 ### Inspect per-store unit weights
 
