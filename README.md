@@ -94,7 +94,7 @@ For more comprehensive k-folds forward chaining validation, use the `sc_forward_
 ```python
 sc_forward_chain_cv(ulsc, df, k=5)
 ```
-Validation outputs will appear in a table and performed on each outcome and ratio metric identified. The output will look something like:
+Validation outputs will appear in a table and performed on each outcome and ratio metric identified. The output will look something like the following, with rows for each fold x metric combination:
 | outcome | fold | n_train_days | n_val_store_days | mape | r2 | train_end | val_start | val_end |
 |---|---|---|---|---|---|---|---|---|
 | transactions | 1 | 46 | 874 | 10.76% | 0.7626 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
