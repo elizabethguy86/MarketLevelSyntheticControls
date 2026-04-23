@@ -4,6 +4,7 @@ setup.py
 MarketLevelSC/__init__.py
 MarketLevelSC/plotting.py
 MarketLevelSC/unit_level_synthetic_control.py
+MarketLevelSC/validation.py
 MarketLevelSC.egg-info/PKG-INFO
 MarketLevelSC.egg-info/SOURCES.txt
 MarketLevelSC.egg-info/dependency_links.txt
