@@ -83,11 +83,11 @@ To assess the quality of your model, MarketLevelSyntheticControls has a `pre_per
 ```python
 pre_period_fit_metrics(
     result_df,
-    outcomes=['transactions', 'grossSales'],
+    outcomes=['transactions', 'revenue'],
     treat_col='is_test_store',
     post_col='post_launch',
     unit_col='locationNum',
-    ratio_metrics={'avgTicket': ('grossSales', 'transactions')},
+    ratio_metrics={'avgTransaction': ('revenue', 'transactions')},
 )
 ```
 For more comprehensive k-folds forward chaining validation, use the `sc_forward_chain_cv` function on a fitted unit-level synthetic control object. 
@@ -98,8 +98,8 @@ Validation outputs will appear in a table and performed on each outcome and rati
 | outcome | fold | n_train_days | n_val_store_days | mape | r2 | train_end | val_start | val_end |
 |---|---|---|---|---|---|---|---|---|
 | transactions | 1 | 46 | 874 | 10.76% | 0.7626 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
-| grossSales | 1 | 46 | 874 | 12.37% | 0.7682 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
-| avgTicket | 1 | 46 | 874 | 3.70% | 0.8241 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
+| revenue | 1 | 46 | 874 | 12.37% | 0.7682 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
+| avgTransaction | 1 | 46 | 874 | 3.70% | 0.8241 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
 
 
 ### Inspect per-store unit weights
