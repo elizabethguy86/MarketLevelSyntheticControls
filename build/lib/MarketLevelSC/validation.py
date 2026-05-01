@@ -512,7 +512,7 @@ def sc_power_curve(
     fig.update_layout(
         title="SC Power Curve (Placebo Holdout Simulation)",
         xaxis_title="Simulated Lift (%)",
-        yaxis_title="Rejection Rate",
+        yaxis_title="Power",
         yaxis=dict(range=[0, 1.05]),
         legend_title="Outcome",
         template="plotly_white",
