@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="MarketLevelSC",
-    version="0.1.1",
+    version="0.1.2",
     description="Market-level synthetic control methods for causal inference",
     author="Your Name",
     author_email="your.email@example.com",
