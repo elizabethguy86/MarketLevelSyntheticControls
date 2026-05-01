@@ -297,3 +297,227 @@ def sc_forward_chain_cv(slsc, data, k=5):
     display_df["mape"] = display_df["mape"].map(lambda v: f"{v:.2%}" if pd.notna(v) else "")
     display_df["r2"]   = display_df["r2"].map(lambda v: f"{v:.4f}" if pd.notna(v) else "")
     return display_df
+
+
+def sc_power_curve(
+    slsc: "StoreLevelSyntheticControl",
+    data: pd.DataFrame,
+    sim_start_date,
+    sim_end_date,
+    lifts=None,
+    outcomes=None,
+    n_permutations: int = 500,
+    alpha: float = 0.05,
+    seed: int = None,
+) -> tuple:
+    """
+    Estimate power of the SC estimator via a placebo holdout simulation.
+
+    A contiguous pre-period window ``[sim_start_date, sim_end_date]`` is
+    treated as a synthetic post-period.  The SC is re-fitted on the dates
+    *before* ``sim_start_date``, then a grid of artificial lifts is applied
+    to the treated stores inside the window. Power at each lift = fraction of
+    permutation tests that are significant at ``alpha``.
+
+    Parameters
+    ----------
+    slsc : StoreLevelSyntheticControl
+        A *fitted* SC instance (used for its column-name configuration).
+    data : pd.DataFrame
+        Full dataset (pre + real post).  Only dates ≤ ``sim_end_date`` are used.
+    sim_start_date : str | pd.Timestamp
+        First date of the synthetic holdout (inclusive).
+    sim_end_date : str | pd.Timestamp
+        Last date of the synthetic holdout (inclusive).  Must be in the
+        pre-period so no real treatment effect contaminates the simulation.
+    lifts : list[float], optional
+        Relative lifts to test (e.g. ``[-0.1, 0, 0.1]``).  Defaults to
+        ``np.arange(-0.15, 0.16, 0.05).tolist()``.
+    outcomes : str | list[str] | None, optional
+        Subset of outcomes to simulate and plot.  Can be any direct outcome
+        column or ratio-metric key defined on ``slsc``.  When a ratio metric
+        is requested, the lift is applied to its numerator column.
+        ``None`` (default) runs all outcomes.
+    n_permutations : int
+        Permutations per lift value (default 500).
+    alpha : float
+        Significance threshold (default 0.05).
+    seed : int | None
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, plotly.Figure]
+        results_df : one row per (outcome, lift) with columns
+            outcome, lift, p_value, significant
+        fig : Plotly power curve figure
+
+    Notes
+    -----
+    Runtime scales as ``len(lifts) × n_permutations × n_control_stores``.
+    With 500 permutations, 21 lift values, and 620 control stores expect
+    ~10–20 minutes. Reduce ``n_permutations`` to 200 for a quick preview.
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    sim_start_date = pd.Timestamp(sim_start_date)
+    sim_end_date   = pd.Timestamp(sim_end_date)
+
+    if sim_start_date >= sim_end_date:
+        raise ValueError("sim_start_date must be before sim_end_date.")
+
+    all_fit_outcomes = slsc._all_fit_outcomes()
+    declared_outcomes = (
+        [slsc.outcome_col] if isinstance(slsc.outcome_col, str)
+        else list(slsc.outcome_col)
+    )
+    ratio_metrics = slsc.ratio_metrics or {}
+
+    # ── Resolve requested outcome(s) ──────────────────────────────────────
+    all_possible_outcomes = declared_outcomes + list(ratio_metrics.keys())
+    if outcomes is None:
+        requested_outcomes = all_possible_outcomes
+    else:
+        requested_outcomes = [outcomes] if isinstance(outcomes, str) else list(outcomes)
+        invalid = [o for o in requested_outcomes if o not in all_possible_outcomes]
+        if invalid:
+            raise ValueError(
+                f"Unknown outcome(s): {invalid}. "
+                f"Available: {all_possible_outcomes}"
+            )
+
+    # Determine which raw fit columns to lift for the requested outcomes.
+    # Direct outcomes → lift that column.  Ratio metrics → lift numerator.
+    lift_cols = set()
+    for o in requested_outcomes:
+        if o in all_fit_outcomes:
+            lift_cols.add(o)
+        elif o in ratio_metrics:
+            lift_cols.add(ratio_metrics[o][0])   # numerator column
+
+    # ── 1. Restrict to dates ≤ sim_end_date (drop real post-period) ───────
+    window_data = data[data[slsc.time_col] <= sim_end_date].copy()
+
+    train_dates   = set(window_data.loc[window_data[slsc.time_col] <  sim_start_date, slsc.time_col].unique())
+    holdout_dates = set(window_data.loc[window_data[slsc.time_col] >= sim_start_date, slsc.time_col].unique())
+
+    if not train_dates:
+        raise ValueError(
+            f"No training dates found before sim_start_date={sim_start_date.date()}. "
+            "Move sim_start_date later."
+        )
+    if not holdout_dates:
+        raise ValueError(
+            f"No holdout dates found in [{sim_start_date.date()}, {sim_end_date.date()}]. "
+            "Check sim_start_date and sim_end_date."
+        )
+
+    n_train   = len(train_dates)
+    n_holdout = len(holdout_dates)
+    print(
+        f"Simulation window:  {sim_start_date.date()} → {sim_end_date.date()} "
+        f"({n_holdout} holdout days)\n"
+        f"Training period:    up to {sorted(train_dates)[-1].date() if hasattr(sorted(train_dates)[-1], 'date') else sorted(train_dates)[-1]} "
+        f"({n_train} training days)"
+    )
+    if requested_outcomes != all_possible_outcomes:
+        print(f"Outcomes filtered to: {requested_outcomes}")
+
+    # ── 2. Mark holdout dates as the synthetic post-period ────────────────
+    window_data["_holdout_post"] = window_data[slsc.time_col] >= sim_start_date
+
+    # ── 3. Re-fit SC on training dates only ───────────────────────────────
+    print(f"\nRe-fitting SC on {n_train} training days...")
+    holdout_slsc = StoreLevelSyntheticControl(
+        outcome_col=slsc.outcome_col,
+        time_col=slsc.time_col,
+        unit_col=slsc.unit_col,
+        treat_col=slsc.treat_col,
+        post_col="_holdout_post",
+        regularization_multiplier=slsc.regularization_multiplier,
+        tail_periods=slsc.tail_periods,
+        ratio_metrics=slsc.ratio_metrics,
+    )
+    holdout_slsc.fit(window_data)
+
+    # ── 4. Evaluate power across lift values ─────────────────────────────
+    rows = []
+    lifts = list(lifts)
+    print(f"\nEvaluating {len(lifts)} lift values × {n_permutations} permutations each...")
+
+    test_holdout_base = (
+        window_data[slsc.treat_col].astype(bool) &
+        window_data["_holdout_post"].astype(bool)
+    )
+
+    # Cast outcome columns to float so fractional lifts can be applied in-place
+    for col in all_fit_outcomes:
+        window_data[col] = window_data[col].astype(float)
+
+    for lift_val in tqdm(lifts, desc="Power curve lifts"):
+        sim_data = window_data.copy()
+        for col in lift_cols:
+            sim_data.loc[test_holdout_base, col] *= (1 + lift_val)
+
+        pval_result = holdout_slsc.permutation_p_values(
+            sim_data,
+            n_permutations=n_permutations,
+            seed=seed,
+        )
+
+        # Filter to only requested outcomes
+        pval_result = pval_result[pval_result["outcome"].isin(requested_outcomes)]
+
+        for _, row in pval_result.iterrows():
+            rows.append({
+                "outcome":     row["outcome"],
+                "lift":        lift_val,
+                "p_value":     row["p_value"],
+                "significant": row["p_value"] <= alpha if pd.notna(row["p_value"]) else False,
+            })
+
+    results_df = pd.DataFrame(rows)
+
+    # ── 5. Plot power curve ───────────────────────────────────────────────
+    colors = ["steelblue", "mediumseagreen", "darkorange", "mediumpurple", "coral"]
+
+    fig = go.Figure()
+    for i, outcome in enumerate(requested_outcomes):
+        sub = results_df[results_df["outcome"] == outcome].sort_values("lift")
+        fig.add_trace(go.Scatter(
+            x=sub["lift"] * 100,
+            y=sub["significant"].astype(float),
+            mode="lines+markers",
+            name=outcome,
+            line=dict(color=colors[i % len(colors)], width=2),
+            marker=dict(size=6),
+        ))
+
+    fig.add_hline(
+        y=alpha,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=f"α = {alpha}",
+        annotation_position="bottom right",
+    )
+    fig.add_hline(
+        y=0.8,
+        line_dash="dot",
+        line_color="gray",
+        annotation_text="80% power",
+        annotation_position="bottom right",
+    )
+
+    fig.update_layout(
+        title="SC Power Curve (Placebo Holdout Simulation)",
+        xaxis_title="Simulated Lift (%)",
+        yaxis_title="Rejection Rate",
+        yaxis=dict(range=[0, 1.05]),
+        legend_title="Outcome",
+        template="plotly_white",
+        width=800,
+        height=500,
+    )
+
+    return results_df, fig
