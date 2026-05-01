@@ -141,3 +141,25 @@ plotter.plot('transactions').show()
 plotter.plot('revenue', yaxis_label='Revenue').show()
 
 ```
+### Pseudo-Power curves to check how well the model performs when fake lifts are added to a holdout time period
+When building these curves, we want to see that the model is capable of detecting lifts applied to a holdout portion of data with 0.80 power. 
+We also want to see that there is no lift detected at 0 lift (0% power). Power curves should be symmetric about the y-axis at 0 if the synthetic control is an unbiased estimator of the counterfactual for the treated group.
+
+```python
+# Make sure simulation window mirrors the length of the actual post-period 
+# Hold out portion of pre-period
+
+lifts = np.arange(-0.10, 0.10, 0.02).tolist()   # -10% to +10% in 2% steps
+
+power_results, power_fig = sc_power_curve(
+    slsc,
+    df_drop,
+    sim_start_date='2025-08-03',   # start of period for testing model
+    sim_end_date='2025-09-28',     # last day before the start of the test
+    lifts=lifts,
+    n_permutations=500,
+    alpha=0.05,
+    seed=42, #for reproducibility
+)
+
+```
