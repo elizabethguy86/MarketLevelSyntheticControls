@@ -7,7 +7,7 @@ Unlike `SyntheticDiD`, which treats all test units as one pooled treatment group
 Other test units are **excluded from each units's donor pool** to prevent contamination between treated units.
 
 ## Download
-Navigate to the `dist/` folder for the latest `.whl` file to download the latest version. Make sure you have the requiremenets needed in the `requires.txt`file[MarketLevelSC.egg-info/requires.txt].
+Navigate to the `dist/` folder for the latest `.whl` file to download the latest version. Make sure you have the requiremenets needed in the `requires.txt` file[MarketLevelSC.egg-info/requires.txt].
 
 ### Data Requirements
 Python pandas dataframe with the structure: 
