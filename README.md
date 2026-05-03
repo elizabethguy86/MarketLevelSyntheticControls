@@ -106,7 +106,8 @@ Validation outputs will appear in a table and performed on each outcome and rati
 | avgTransaction | 1 | 46 | 874 | 3.70% | 0.8241 | 2025-02-14 | 2025-02-15 | 2025-04-01 |
 
 
-### Inspect per-store unit weights
+### Inspect per-treatment unit synthetic control weights
+Examine the weights for time series used in each test unit's synthetic control. 
 
 ```python
 
