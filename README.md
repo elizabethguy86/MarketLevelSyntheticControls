@@ -1,19 +1,23 @@
-## Store-Level Synthetic Control
+## Market-Level Synthetic Control Package
 
-Fits a separate synthetic control for **each individual test unit** and returns the original dataframe with an `expected` column (or `expected_{outcome}` columns for multiple outcomes) representing each test store's counterfactual trajectory.
+This functionality creates a separate synthetic control for **each individual test unit** and returns the original dataframe with an `expected` column (or `expected_{outcome}` columns for multiple outcomes) representing each test store's counterfactual trajectory.
 
 Unlike `SyntheticDiD`, which treats all test units as one pooled treatment group, `StoreLevelSyntheticControl` fits independent unit weights per unit, so each unit gets its own tailored synthetic control. This allows for breakouts of various groups of stores that ladder up to the overall effect.
 
 Other test units are **excluded from each units's donor pool** to prevent contamination between treated units.
 
 ### Data Requirements
+Python pandas dataframe with the structure: 
+
 | Column | Type | Description |
 |--------|------|-------------|
 | `time_col` | date / datetime | One value per time period (e.g., `Date`) |
-| `unit_col` | int / str | Store identifier (e.g., `locationNum`) |
+| `unit_col` | int / str | Unit identifier (e.g., `locationNum`) |
 | `treat_col` | bool | `True` for test units, `False` for control units |
 | `post_col` | bool | `True` for post-intervention rows, `False` for pre-period |
-| outcome columns | numeric | All columns listed in `outcome_col`; if using `ratio_metrics`, both numerator and denominator columns must be present |
+| outcome columns | numeric | All columns listed in `outcome_col`; if using `ratio_metrics`, both numerator and denominator columns must be present in your dataframe |
+
+Note that other time series like ambient temperature or macroeconomic factors could be used as long as they are in the time series format and have an entry for that date in the `time_col`. Specify the time series indicator label in the `unit_col` (e.g., "temperature").
 
 ### Example Usage
 
@@ -22,7 +26,7 @@ Other test units are **excluded from each units's donor pool** to prevent contam
 df = pd.read_csv('your_data.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 
-# Define test stores and add flag columns
+# Define test units and add flag columns
 test_units = [1, 2, 3, 4, 5,
                6, 7, 8, 9, 10, 11,
                12, 13, 14, 15, 16, 17, 18, 19, 20]
