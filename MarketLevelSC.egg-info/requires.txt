@@ -1,6 +1,0 @@
-numpy
-pandas
-cvxpy
-scikit-learn
-tqdm
-plotly
