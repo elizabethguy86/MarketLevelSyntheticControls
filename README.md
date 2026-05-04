@@ -7,7 +7,7 @@ A unique aspect of this program is that `MarketLevelSyntheticControl` fits indep
 Other test units are **excluded from each units's donor pool** to prevent contamination between treated units.
 
 ## Download
-Navigate to the `dist/` folder for the latest `.whl` file to download the latest version. Make sure you have the requiremenets needed in the `requires.txt` file[MarketLevelSC.egg-info/requires.txt].
+Navigate to the `dist/` folder for the latest `.whl` file to download the latest version. Make sure you have the python package requirements needed, as listed under `install_requires` in the `setup.py` file. 
 
 ### Data Requirements
 Python pandas dataframe with the structure: 
