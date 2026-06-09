@@ -16,8 +16,8 @@ Python pandas dataframe with the structure:
 |--------|------|-------------|
 | `time_col` | date / datetime | One value per time period (e.g., `Date`) |
 | `unit_col` | int / str | Unit identifier (e.g., `locationNum`) |
-| `treat_col` | bool | `True` for test units, `False` for control units |
-| `post_col` | bool | `True` for post-intervention rows, `False` for pre-period |
+| `treat_col` | bool | `True` for test units, `False` for control units. **this must be a bool** |
+| `post_col` | bool | `True` for post-intervention rows, `False` for pre-period. **this must be a bool** |
 | outcome columns | numeric | All columns listed in `outcome_col`; if using `ratio_metrics`, both numerator and denominator columns must be present in your dataframe |
 
 Note that other time series like ambient temperature or macroeconomic factors could be used as long as they are in the time series format and have an entry for that date in the `time_col`. Specify the time series indicator label in the `unit_col` (e.g., "temperature").
