@@ -25,6 +25,8 @@ Note that other time series like ambient temperature or macroeconomic factors co
 ### Example Usage
 
 ```python
+#import module
+from MarketLevelSC import UnitLevelSyntheticControl
 # Load your panel data
 df = pd.read_csv('your_data.csv')
 df['Date'] = pd.to_datetime(df['Date'])
