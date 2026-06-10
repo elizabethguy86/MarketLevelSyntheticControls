@@ -143,7 +143,7 @@ plotter = SyntheticControlPlotter(
     treat_col='is_test_store',
     post_col='post_launch',
     intervention_datetime='2025-11-03',
-    ratio_metrics={'avgTicket': ('grossSales', 'transactions')},
+    ratio_metrics={'avgTransaction': ('revenue', 'transactions')},
 )
 
 plotter.plot('avgTransaction', yaxis_label='Avg Transaction Size').show()
