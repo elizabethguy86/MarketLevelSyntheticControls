@@ -131,7 +131,7 @@ pval_df = ulsc_ratio.permutation_p_values(df)
 #                 / (Σ expected_revenue / Σ expected_transactions)
 
 # using a subsample of control units to build out the null distribution
-pval_df_n_placebos = slsc.permutation_p_values(df, n_placebos=200, seed=42)
+pval_df_n_placebos = ulsc_ratio.permutation_p_values(df, n_placebos=200, seed=42)
 ```
 ### Plotting actual vs expected time series based on SC modeling
 
