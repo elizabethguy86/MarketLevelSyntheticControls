@@ -52,6 +52,8 @@ def fit_unit_weights(
     regularization_multiplier: float = 3.0,
     tail_periods: int = None,
     zeta_override: float = None,
+    solver: str = None,
+    solver_opts: dict = None,
 ):
     """
     Fit unit weights for the synthetic control.
@@ -116,7 +118,7 @@ def fit_unit_weights(
     )
     constraints = [cp.sum(w[1:]) == 1, w[1:] >= 0]
     problem = cp.Problem(objective, constraints)
-    problem.solve(verbose=False)
+    problem.solve(solver=solver, verbose=False, **(solver_opts or {}))
 
     unit_weights = pd.Series(
         w.value[1:],
@@ -162,8 +164,13 @@ class UnitLevelSyntheticControl(BaseEstimator):
         Higher values push weights closer to uniform (less sparse).
     tail_periods : int or None, default None
         If set, the last N pre-period dates receive quadratically increasing
-        MSE weight so the fit is tightest just before the intervention.
-    ratio_metrics : dict or None, default None
+        MSE weight so the fit is tightest just before the intervention.    solver : str or None, default None
+        cvxpy solver to use (e.g. ``'CLARABEL'``, ``'OSQP'``, ``'SCS'``).
+        If None, cvxpy selects the default solver (CLARABEL).
+    solver_opts : dict or None, default None
+        Additional keyword arguments passed directly to the solver, e.g.
+        ``{'max_iter': 10000}`` for OSQP/SCS or ``{'max_iters': 10000}``
+        for CLARABEL.    ratio_metrics : dict or None, default None
         Mapping of derived ratio metric names to their (numerator, denominator)
         component columns, e.g. ``{'avgTicket': ('grossSales', 'transactions')}``.
         Component columns are automatically fitted even if not listed in
@@ -200,6 +207,8 @@ class UnitLevelSyntheticControl(BaseEstimator):
         regularization_multiplier: float = 3.0,
         tail_periods: int = None,
         ratio_metrics: dict = None,
+        solver: str = None,
+        solver_opts: dict = None,
     ):
         self.outcome_col = outcome_col
         self.time_col = time_col
@@ -209,6 +218,8 @@ class UnitLevelSyntheticControl(BaseEstimator):
         self.regularization_multiplier = regularization_multiplier
         self.tail_periods = tail_periods
         self.ratio_metrics = ratio_metrics
+        self.solver = solver
+        self.solver_opts = solver_opts
 
     def _all_fit_outcomes(self):
         """
@@ -277,6 +288,8 @@ class UnitLevelSyntheticControl(BaseEstimator):
                     post_col=self.post_col,
                     regularization_multiplier=self.regularization_multiplier,
                     tail_periods=self.tail_periods,
+                    solver=self.solver,
+                    solver_opts=self.solver_opts,
                 )
                 self.unit_weights_[unit][outcome] = (weights, intercept)
 
